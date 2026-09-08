@@ -1,4 +1,4 @@
-package com.fulfillment.service.repository;
+package com.fulfillment.service.repository.redis;
 
 import com.fulfillment.service.model.ProductCache;
 import org.springframework.data.repository.CrudRepository;

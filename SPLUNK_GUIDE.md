@@ -11,7 +11,8 @@ Once the Docker Compose stack is running (`docker compose up -d`), navigate to:
 👉 **[http://localhost:8000](http://localhost:8000)**
 
 * **Username**: `admin`
-* **Password**: `SplunkPassword123`
+* **Pa
+sword**: `SplunkPassword123`
 
 ---
 

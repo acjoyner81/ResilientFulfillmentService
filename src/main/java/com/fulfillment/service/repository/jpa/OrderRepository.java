@@ -1,4 +1,4 @@
-package com.fulfillment.service.repository;
+package com.fulfillment.service.repository.jpa;
 
 import com.fulfillment.service.model.Order;
 import com.fulfillment.service.model.OrderStatus;

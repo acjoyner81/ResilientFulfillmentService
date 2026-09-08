@@ -1,32 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - [app=resilient-fulfillment-service traceId=%X{traceId:-N/A}] %msg%n"/>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
-    <!-- Console Appender for Dynatrace & Splunk STDOUT ingestion -->
+    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="resilient-fulfillment-service"/>
+    <springProperty scope="context" name="logPath" source="logging.file.path" defaultValue="./logs"/>
+    <springProperty scope="context" name="splunkUrl" source="splunk.hec.url" defaultValue="http://localhost:8088/services/collector/event"/>
+    <springProperty scope="context" name="splunkToken" source="splunk.hec.token" defaultValue="[REDACTED_SPLUNK_HEC_TOKEN]"/>
+
+    <!-- Console Appender -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>${LOG_PATTERN}</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - [app=${appName} traceId=%X{traceId:-N/A} spanId=%X{spanId:-N/A}] %msg%n</pattern>
         </encoder>
     </appender>
 
-    <property name="LOG_DIR" value="${LOG_PATH:-/var/log/fulfillment-service}"/>
-
-    <!-- Rolling File Appender for local / RHEL log directory (/var/log/fulfillment-service) -->
+    <!-- File Appender with Trace & Span IDs -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_DIR}/resilient-fulfillment.log</file>
+        <file>${logPath}/resilient-fulfillment.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_DIR}/resilient-fulfillment-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${logPath}/archived/resilient-fulfillment-%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
-            <pattern>${LOG_PATTERN}</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - [app=${appName} traceId=%X{traceId:-N/A} spanId=%X{spanId:-N/A}] %msg%n</pattern>
         </encoder>
     </appender>
 
-    <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
-    </root>
+    <!-- Splunk HEC HTTP Appender -->
+    <appender name="SPLUNK" class="com.splunk.logging.HttpEventCollectorLogbackAppender">
+        <url>${splunkUrl}</url>
+        <token>${splunkToken}</token>
+        <sourcetype>fulfillment_app_logs</sourcetype>
+        <source>${appName}</source>
+        <disableCertificateValidation>true</disableCertificateValidation>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - [app=${appName} traceId=%X{traceId:-N/A} spanId=%X{spanId:-N/A}] %msg</pattern>
+        </layout>
+    </appender>
 
-    <logger name="com.fulfillment.service" level="DEBUG"/>
+    <!-- Async Splunk Appender -->
+    <appender name="ASYNC_SPLUNK" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="SPLUNK" />
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+        <appender-ref ref="ASYNC_SPLUNK" />
+    </root>
 </configuration>

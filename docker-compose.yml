@@ -38,10 +38,15 @@ services:
     image: splunk/splunk:latest
     platform: linux/amd64
     container_name: fulfillment-splunk
+    tty: true
+    stdin_open: true
     environment:
       - SPLUNK_START_ARGS=--accept-license
       - SPLUNK_GENERAL_TERMS=--accept-sgt-current-at-splunk-com
       - SPLUNK_PASSWORD=SplunkPassword123
+      - PYTHONUNBUFFERED=1
+      - ANSIBLE_FORCE_COLOR=0
+      - ANSIBLE_NOCOLS=1
     ports:
       - "8000:8000"
       - "8088:8088"
@@ -69,6 +74,9 @@ services:
       DB_DIALECT: "org.hibernate.dialect.PostgreSQLDialect"
       REDIS_HOST: "redis"
       REDIS_PORT: "6379"
+      LOGGING_FILE_PATH: "/var/log/fulfillment-service"
+      SPLUNK_HEC_URL: "http://splunk:8088/services/collector/event"
+      SPLUNK_HEC_TOKEN: "[REDACTED_SPLUNK_HEC_TOKEN]"
     networks:
       - fulfillment-network
     depends_on:
