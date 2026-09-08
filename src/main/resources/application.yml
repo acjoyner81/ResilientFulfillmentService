@@ -63,7 +63,7 @@ management:
 splunk:
   hec:
     url: ${SPLUNK_HEC_URL:http://localhost:8088/services/collector/event}
-    token: ${SPLUNK_HEC_TOKEN:[REDACTED_SPLUNK_HEC_TOKEN]}
+    token: ${SPLUNK_HEC_TOKEN:REDACTED_REMOVE_AND_ROTATE}
 
 logging:
   level:

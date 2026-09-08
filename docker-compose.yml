@@ -76,7 +76,7 @@ services:
       REDIS_PORT: "6379"
       LOGGING_FILE_PATH: "/var/log/fulfillment-service"
       SPLUNK_HEC_URL: "http://splunk:8088/services/collector/event"
-      SPLUNK_HEC_TOKEN: "[REDACTED_SPLUNK_HEC_TOKEN]"
+      SPLUNK_HEC_TOKEN: ${SPLUNK_HEC_TOKEN}
     networks:
       - fulfillment-network
     depends_on:
